@@ -27,7 +27,8 @@ class TaskController
             $id = $_SESSION['userid'];
             $data['userid'] = $id;
             $this->insertIntoDb($this->table, $data);
-            header('Location: show');
+            header('Location: /task/show');
+            echo '12345';
         }
         require_once (ROOT.'/views/task/add_task_form.php');
 
