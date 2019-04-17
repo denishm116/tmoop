@@ -28,7 +28,7 @@ class TaskController
             $data['userid'] = $id;
             $this->insertIntoDb($this->table, $data);
             header('Location: /task/show');
-            echo '12345';
+
         }
         require_once (ROOT.'/views/task/add_task_form.php');
 
@@ -42,23 +42,28 @@ class TaskController
     }
 
     public function actionEdit($id)
-    {   ob_start();
-        $newsItem = Task::getTaskById($this->table, $id);
-        require_once(ROOT . '/views/task/edit_task_form.php');
-        ob_end_flush();
-        if ($id) {
+    {
+
+        if ($_POST) {
             $data = $_POST;
             $file = $_FILES;
             $edit = new Task();
             $edit->updateTask($this->table, $data, $file, $id);
             header('Location: /task/show');
+            exit();
             }
+        $newsItem = Task::getTaskById($this->table, $id);
+        require_once(ROOT . '/views/task/edit_task_form.php');
 
 
     }
 
     public function actionDelete($id)
     {
-        return true;
+        $db = Db::getConnection();
+        $db->exec("DELETE FROM tasks WHERE id = '$id'");
+
+        header('Location: /task/show');
+
     }
 }

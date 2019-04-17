@@ -31,14 +31,16 @@ class UserController
             $this->data['password'] = md5($_POST['password']);
             User::login($this->table, $this->data);
             header('Location: /task/show');
-
         }
-
-
         require_once (ROOT.'/views/user/login.php');
-        return true;
     }
 
 
+    public function actionLogout()
+    {
+        $_SESSION = array();
 
+        session_destroy();
+        header('Location: /user/login');
+    }
 }
