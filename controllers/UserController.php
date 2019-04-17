@@ -30,7 +30,7 @@ class UserController
             $this->data = $_POST;
             $this->data['password'] = md5($_POST['password']);
             User::login($this->table, $this->data);
-
+            header('Location: /task/show');
 
         }
 
