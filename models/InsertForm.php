@@ -5,25 +5,26 @@ trait InsertForm
     public static function insertIntoDb($table, $data) {
         $db = Db::getConnection();
 
-        //Извлекаем ключи передаваемого массива значений (будут использоваться как название столбцов БД)
-        $keys = implode(', ', array_keys($data));
+        if (isset($data['password'])) {
+            $data['password'] = md5($data['password']);
+        }
+            //Извлекаем ключи передаваемого массива значений (будут использоваться как название столбцов БД)
+            $keys = implode(', ', array_keys($data));
 
-        //Преобразуем ключи в вид placeholders для PDO
-        $string = ":" . implode(", :", array_keys($data));
+            //Преобразуем ключи в вид placeholders для PDO
+            $string = ":" . implode(", :", array_keys($data));
 
-        //Сохраняем массив с placeholders
-        $placeholders = explode(", ", $string);
+            //Сохраняем массив с placeholders
+            $placeholders = explode(", ", $string);
 
-        //объединяем массив с placeholders и значениями для передачи в execute
-        $values = array_combine($placeholders, $data);
+            //объединяем массив с placeholders и значениями для передачи в execute
+            $values = array_combine($placeholders, $data);
 
-        //Формируем SQL запрос
-        $sql = "INSERT INTO {$table} ({$keys}) VALUES ({$string})";
-//        var_dump($sql);
-//  var_dump($values);
-//  var_dump($_SESSION);
-        $statement = $db->prepare($sql);
-       $statement->execute($values);
+            //Формируем SQL запрос
+            $sql = "INSERT INTO {$table} ({$keys}) VALUES ({$string})";
+            $statement = $db->prepare($sql);
+            $rows = $statement->execute($values);
+            return $rows;
 
 
     }

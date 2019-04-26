@@ -1,9 +1,7 @@
 <?php
-
-
-
 return array(
 
+//    '([a-z0-9]+)'=>'hello/hello',
     'user/register' => 'user/register',
     'user/login' => 'user/login',
     'user/logout' => 'user/logout',
@@ -13,8 +11,8 @@ return array(
     'task/create' => 'task/create',
     'task/edit' => 'task/edit',
     'task/delete' => 'task/delete',
-
-);
+    ''=>'hello/hi/',
+    );
 
 
 /*

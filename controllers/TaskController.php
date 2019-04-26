@@ -1,25 +1,36 @@
 <?php
 
-require_once (ROOT.'/models/Task.php');
-require_once (ROOT.'/models/InsertForm.php');
-require_once (ROOT.'/models/File.php');
+//require_once (ROOT.'/models/Task.php');
+//require_once (ROOT.'/models/InsertForm.php');
+//require_once (ROOT.'/models/File.php');
 class TaskController
 {
+    //Подключаем трейт
     use InsertForm;
 
+    //Объявляем свойства класса
     private $table = "tasks";
+    public $taskItem;
 
-    public function actionShow()
+    //Объявляем конструктор класса, создаем экземпляр класса
+    public function __construct()
     {
-        $tasks = array();
-        $task = new Task;
-        $tasks = $task->taskShow($this->table, $_SESSION['userid']);
-        require_once(ROOT . '/views/task/index.php');
+        $this->taskItem = new Task();
     }
 
+    //Отображаем список задач
+    public function actionShow()
+    {
+        $vars = $this->taskItem->taskShow($this->table, $_SESSION['userid']);
+
+        echo Template::render('tasklist', $vars);
+        exit;
+
+    }
+
+    //Создаем задачу
     public function actionCreate()
     {
-
         if ($_POST) {
             $filename = $this->uploadImage($_FILES['image']);
             $data = $_POST;
@@ -27,43 +38,41 @@ class TaskController
             $id = $_SESSION['userid'];
             $data['userid'] = $id;
             $this->insertIntoDb($this->table, $data);
-            header('Location: /task/show');
-
+            $this->actionShow();
         }
-        require_once (ROOT.'/views/task/add_task_form.php');
-
-
+        echo Template::render('addtask');
+        exit;
     }
 
+    //Отображаем конкретную задачу
     public function actionView($id)
     {
-        $newsItem = Task::getTaskById($this->table, $id);
-        require_once (ROOT.'/views/task/view.php');
+        $vars = $this->taskItem->getTaskById($this->table,$id);
+        echo Template::render('viewtask', $vars);
+//        require_once (ROOT.'/views/task/view.php');
+        exit;
     }
 
+    //Редактируем задачу
     public function actionEdit($id)
     {
-
         if ($_POST) {
             $data = $_POST;
             $file = $_FILES;
             $edit = new Task();
-            $edit->updateTask($this->table, $data, $file, $id);
-            header('Location: /task/show');
+            $vars = $edit->updateTask($this->table, $data, $file, $id);
+            $this->actionShow();
             exit();
             }
-        $newsItem = Task::getTaskById($this->table, $id);
-        require_once(ROOT . '/views/task/edit_task_form.php');
-
-
+        $vars = $this->taskItem->getTaskById($this->table, $id);
+        echo Template::render('edittask', $vars);
+        exit;
     }
 
+    //Удаляем задачу
     public function actionDelete($id)
     {
-        $db = Db::getConnection();
-        $db->exec("DELETE FROM tasks WHERE id = '$id'");
-
-        header('Location: /task/show');
-
+        $this->taskItem->deleteTask($id);
+        $this->actionShow();
     }
 }

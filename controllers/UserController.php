@@ -1,46 +1,61 @@
 <?php
-require_once (ROOT.'/models/User.php');
-require_once (ROOT.'/models/InsertForm.php');
+//require_once (ROOT.'/models/User.php');
+//require_once (ROOT.'/models/InsertForm.php');
 
 class UserController
     {
+    //Подключаем трейт
         use InsertForm;
 
+    //Объявляем свойства класса
         private $data;
         private $table = "users";
+        public $check;
 
 
-    public function actionRegister()
-    {
-
-           if($_POST) {
-               $this->data = $_POST;
-               $this->data['password'] = md5($_POST['password']);
-               User::checkRegisteredUsers($this->data);
-               InsertForm::insertIntoDb($this->table, $this->data);
-               header('Location: /user/login');
-       }
-        require_once (ROOT.'/views/user/register.php');
-
-    }
-
-    public function actionLogin()
-    {
-        if ($_POST) {
+    //Объявляем конструктор класса, создаем экземпляр класса
+        public function __construct()
+        {
             $this->data = $_POST;
-            $this->data['password'] = md5($_POST['password']);
-            User::login($this->table, $this->data);
-            header('Location: /task/show');
+            $this->check = new User();
+
         }
-        require_once (ROOT.'/views/user/login.php');
+
+
+    //Регистрируем пользователя
+        public function actionRegister()
+        {
+            if($_POST) {
+                $this->check->checkFormEmpty($this->data);
+                User::checkRegisteredUsers($this->data);
+                InsertForm::insertIntoDb($this->table, $this->data);
+                header('Location: /user/login');
+                exit;
+            }
+            echo Template::render('register');
+            exit;
+        }
+
+
+
+        //Логинимся
+        public function actionLogin()
+        {
+            if ($_POST) {
+                $this->check->checkFormEmpty($this->data);
+                User::login($this->table, $this->data);
+                header('Location: /task/show');
+                exit;
+        }
+            echo Template::render('login');
+            exit;
+        }
+
+    //Логаут и удаление сессии.
+        public function actionLogout()
+        {
+            $_SESSION = array();
+            session_destroy();
+            header('Location: /user/login');
+        }
     }
-
-
-    public function actionLogout()
-    {
-        $_SESSION = array();
-
-        session_destroy();
-        header('Location: /user/login');
-    }
-}

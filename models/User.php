@@ -1,8 +1,22 @@
 <?php
+/*В этом файле я не стал выносить $db = Db::getConnection(); в свойство класса, чтобы показать и статические методы и обычные
+*/
+
 
 class User
 {
-
+    //Проверяем форму на пустоту
+    public function checkFormEmpty ($data)
+    {
+        foreach ($data as $key => $dat) {
+            if (!$dat) {
+                $error = "Заполните поле " . $key;
+                $data['error'] = $error;
+                echo Template::render('error', $data);
+                exit;
+            }
+        }
+    }
 
     //Проверка на наличие в базе Юзернейм и Емаил
     public static function getOneValue($table, $field, $value)
@@ -11,10 +25,11 @@ class User
         $sql = "SELECT COUNT(*) FROM {$table} WHERE {$field} = :value";
         $stmt = $db->prepare($sql);
         $params = [':value' => $value];
-        $rows = $stmt->execute($params);
+        $stmt->execute($params);
         $row = $stmt->fetch();
         return $row[0];
     }
+
     //Проверка на наличие в базе Юзернейм и Емаил
     public static function checkRegisteredUsers($data)
     {
@@ -26,12 +41,11 @@ class User
             exit;
         } elseif ($count_emails > 0) {
             $error = "Пользователь с таким email уже существует";
-            require ROOT . "/config/errors.php";
+            $data['error'] = $error;
+            echo Template::render('error', $data);
             exit;
         }
     }
-
-
 
     public static function allUsers($table, $data)
     {
@@ -44,9 +58,10 @@ class User
         return $array;
     }
 
-//Проверка имени и  парлоя и запись в сессию переменных
+    //Проверка имени и парлоя и запись в сессию переменных
     public static function login($table, $data)
     {
+        $data['password'] = md5($data['password']);
         $users = User::allUsers($table, $data);
 
         foreach ($users as $user) {
@@ -55,11 +70,13 @@ class User
                     $_SESSION['email'] = $user['email'];
                     $_SESSION['userid'] = $user['id'];
                     $_SESSION['username'] = $user['username'];
+                } else {
+                    $error = "Неверный е-маил или пароль";
+                    $data['error'] = $error;
+                    echo Template::render('error', $data);
+                    exit;
                 }
-
             }
-
         }
-
     }
 }
